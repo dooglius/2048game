@@ -1,5 +1,5 @@
 all:
 	gcc -O3 solve.c -lm -o game
-source:
+assembly:
 	gcc -O3 solve.c -lm -S
 

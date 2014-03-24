@@ -17,7 +17,7 @@ struct state{
 	char score;
 };
 
-const char reclist[] = {7,6,6,5,5,4,4,4,4,4,4,3,3,3,3};
+const char reclist[] = {8,7,6,6,5,5,4,4,4,4,4,4,3,3,3};
 
 int fd;
 
@@ -51,7 +51,6 @@ bool move(struct state *s, char dir){
 				if(next == 0) continue;
 				if(canmix && s->arr[i][c-1] == next){
 					s->arr[i][c-1] = next+1;
-					if(next == 11) newscore += 50;
 					canmix = false;
 					newscore++;
 					ans=true;
@@ -76,7 +75,6 @@ bool move(struct state *s, char dir){
 				if(next == 0) continue;
 				if(canmix && s->arr[c-1][i] == next){
 					s->arr[c-1][i] = next+1;
-					if(next == 11) newscore += 50;
 					canmix = false;
 					newscore++;
 					ans=true;
@@ -101,7 +99,6 @@ bool move(struct state *s, char dir){
 				if(next == 0) continue;
 				if(canmix && s->arr[i][4-c] == next){
 					s->arr[i][4-c] = next+1;
-					if(next == 11) newscore += 50;
 					canmix = false;
 					newscore++;
 					ans=true;
@@ -126,7 +123,6 @@ bool move(struct state *s, char dir){
 				if(next == 0) continue;
 				if(canmix && s->arr[4-c][i] == next){
 					s->arr[4-c][i] = next+1;
-					if(next == 11) newscore += 50;
 					canmix = false;
 					newscore++;
 					ans=true;
@@ -151,23 +147,16 @@ double go2(struct state *s, char rec);
 
 double go(struct state s, char rec){
 	if(rec == 0) return s.score;
-	struct state left = s,right=s,up=s,down=s;
+	struct state temp;
 	double ans = -100;
-	if(move(&left, LEFT)){
-		double t = go2(&left,rec);
-		if(t > ans) ans=t;
-	}
-	if(move(&right, RIGHT)){
-		double t = go2(&right,rec);
-		if(t > ans) ans=t;
-	}
-	if(move(&up, UP)){
-		double t = go2(&up,rec);
-		if(t > ans) ans=t;
-	}
-	if(move(&down, DOWN)){
-		double t = go2(&down,rec);
-		if(t > ans) ans=t;
+
+	int i;
+	for(i=0; i<4; i++){
+		temp=s;
+		if(move(&temp, i)){
+			double t = go2(&temp,rec);
+			if(t>ans) ans=t;
+		}
 	}
 	return ans;
 }
@@ -175,9 +164,6 @@ double go(struct state s, char rec){
 double go2(struct state *s, char rec){
 	char i,j,c;
 	double ans;
-	if(s->score == 0){
-		return -100;
-	}
 	c = 0;
 	ans = 0;
 	s->score--;
@@ -194,6 +180,7 @@ double go2(struct state *s, char rec){
 		}
 	}
 	s->score++;
+	if(c==0) return -100;
 	return ans/c;
 }
 
@@ -238,8 +225,18 @@ int main(){
 	struct state s;
 	char i,j;
 
-	printf("Mode: ");
-	scanf("%d",&m);
+	printf("Mode 1: copy from start of browser game\n");
+	printf("Mode 2: start from a specific position\n");
+	printf("Mode 3: play automatically\n");
+	while(1){
+		printf("Select mode: ");
+		scanf("%d",&m);
+		if(m<=0 || m>3){
+			printf("Bad input\n");
+		} else {
+			break;
+		}
+	}
 	if(m==2){
 		char score = 0;
 		for(i = 0; i < 4; i++){
@@ -307,52 +304,34 @@ int main(){
 			s.score--;
 		}
 	
-		struct state left = s,right=s,up=s,down=s;
+		struct state dir[4];
 		char rec = reclist[s.score];
 		
 		double top = -100;
 		struct state *best = NULL;
 
-		if(move(&left, LEFT)){
-			double t = go2(&left, rec);
-			if(t>top){
-				top=t;
-				best=&left;
-			}
-		}
-		if(move(&right, RIGHT)){
-			double t = go2(&right, rec);
-			if(t>top){
-				top=t;
-				best=&right;
-			}
-		}
-		if(move(&up, UP)){
-			double t = go2(&up, rec);
-			if(t>top){
-				top=t;
-				best=&up;
-			}
-		}
-		if(move(&down, DOWN)){
-			double t = go2(&down, rec);
-			if(t>top){
-				top=t;
-				best=&down;
+		for(i=0; i<4; i++){
+			dir[i] = s;
+			if(move(&(dir[i]),i)){
+				double t = go2(&(dir[i]), rec);
+				if(t>top){
+					top=t;
+					best=&(dir[i]);
+				}
 			}
 		}
 
 		if(best==NULL){
-			printf("No good moves...\n");
+			printf("No good moves, ending in this state:\n\n\n");
 			print(&s);
 			return 0;
 		}
 
-		if(best == &up){
+		if(best == &(dir[0])){
 			printf("Up\n");
-		} else if(best == &right){
+		} else if(best == &(dir[1])){
 			printf("Right\n");
-		} else if(best == &down){
+		} else if(best == &(dir[2])){
 			printf("Down\n");
 		} else {
 			printf("Left\n");
