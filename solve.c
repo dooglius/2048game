@@ -13,11 +13,12 @@
 #define LEFT 3
 
 struct state{
-	unsigned char arr[4][4];
-	char score;
+	unsigned int arr[4][4];
+	int score;
 };
 
-const char reclist[] = {8,7,6,6,5,5,4,4,4,4,4,4,3,3,3};
+//const char reclist[] = {8,7,6,6,5,5,4,4,4,4,4,4,3,3,3};
+const char reclist[] = {7,6,5,5,5,5,4,4,4,4,4,4,4,4,3};
 
 int fd;
 
@@ -145,14 +146,13 @@ bool move(struct state *s, char dir){
 
 double go2(struct state *s, char rec);
 
-double go(struct state s, char rec){
-	if(rec == 0) return s.score;
+double go(struct state *s, char rec){
 	struct state temp;
 	double ans = -100;
 
 	int i;
 	for(i=0; i<4; i++){
-		temp=s;
+		temp=*s;
 		if(move(&temp, i)){
 			double t = go2(&temp,rec);
 			if(t>ans) ans=t;
@@ -162,6 +162,7 @@ double go(struct state s, char rec){
 }
 
 double go2(struct state *s, char rec){
+	if(rec == 0) return s->score;
 	char i,j,c;
 	double ans;
 	c = 0;
@@ -171,9 +172,13 @@ double go2(struct state *s, char rec){
 		for(j = 0; j < 4; j++){
 			if(s->arr[i][j] == 0){
 				s->arr[i][j] = 1;
-				double t = 0.9*go(*s, rec-1);
-				s->arr[i][j] = 2;
-				ans += t+0.1*go(*s,rec-1);
+				if(rec>3){
+					double t = 0.9*go(s, rec-1);
+					s->arr[i][j] = 2;
+					ans += t+0.1*go(s,rec-1);
+				} else {
+					ans += go(s,rec-1);
+				}
 				s->arr[i][j] = 0;
 				c++;
 			}
@@ -184,12 +189,16 @@ double go2(struct state *s, char rec){
 	return ans/c;
 }
 
+
 unsigned char randbyte(void){
 	unsigned char r;
+/*
 	if(read(fd,&r,1) != 1){
 		printf("Error getting random number\n");
 		exit(1);
 	}
+*/
+	r = rand();
 	return r;
 }
 
@@ -208,8 +217,8 @@ void addrand(struct state *s){
 	while(1){
 		if(parity) r = randbyte();
 		else r = r >> 4;
-		if(r<8) v=2;
-		else if(r<10) v=4;
+		if(r<8) v=1;
+		else if(r<10) v=2;
 		else{
 			parity = !parity;
 			continue;
@@ -220,24 +229,26 @@ void addrand(struct state *s){
 	s->score--;
 }
 
-int main(){
+int main(int argc, char** argv){
 	int x,y,v,m;
 	struct state s;
 	char i,j;
 
-	printf("Mode 1: copy from start of browser game\n");
-	printf("Mode 2: start from a specific position\n");
-	printf("Mode 3: play automatically\n");
-	while(1){
-		printf("Select mode: ");
-		scanf("%d",&m);
-		if(m<=0 || m>3){
-			printf("Bad input\n");
-		} else {
-			break;
+	if(argc <= 1 || (m=atoi(argv[1])) == 0){
+		printf("Mode 1: copy from start of browser game\n");
+		printf("Mode 2: start from a specific position\n");
+		printf("Mode 3: play automatically\n");
+		while(1){
+			printf("Select mode: ");
+			scanf("%d",&m);
+			if(m<=0 || m>3){
+				printf("Bad input\n");
+			} else {
+				break;
+			}
 		}
 	}
-	if(m==2){
+	if(m==1){
 		char score = 0;
 		for(i = 0; i < 4; i++){
 			for(j = 0; j < 4; j++){
@@ -253,7 +264,7 @@ int main(){
 			}
 		}
 		s.score=score;
-	} else if(m==1){
+	} else if(m==2){
 		for(i = 0; i < 4; i++){
 			for(j = 0; j < 4; j++){
 				s.arr[i][j]=0;
@@ -305,9 +316,10 @@ int main(){
 		}
 	
 		struct state dir[4];
-		char rec = reclist[s.score];
+//		char rec = reclist[s.score];
+		char rec = 3;
 		
-		double top = -100;
+		double top = -101;
 		struct state *best = NULL;
 
 		for(i=0; i<4; i++){
