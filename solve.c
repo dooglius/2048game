@@ -37,108 +37,122 @@ void print(struct state *s){
 	printf("\n\n");
 }
 
-bool move(struct state *s, char dir){
+bool moveup(struct state *s){
 	char c,i,j,next;
 	bool canmix = false;
 	char newscore = s->score;
 	bool ans = false;
-	switch(dir){
-	case UP:
-		for(i = 0; i < 4; i++){
-			canmix=false;
-			c = 0;
-			for(j = 0; j < 4; j++){
-				next = s->arr[i][j];
-				if(next == 0) continue;
-				if(canmix && s->arr[i][c-1] == next){
-					s->arr[i][c-1] = next+1;
-					canmix = false;
-					newscore++;
-					ans=true;
-				} else {
-					s->arr[i][c] = next;
-					if(c != j) ans=true;
-					canmix = true;
-					c++;
-				}
-			}
-			for(; c<4; c++){
-				s->arr[i][c] = 0;
+	for(i = 0; i < 4; i++){
+		canmix=false;
+		c = 0;
+		for(j = 0; j < 4; j++){
+			next = s->arr[i][j];
+			if(next == 0) continue;
+			if(canmix && s->arr[i][c-1] == next){
+				s->arr[i][c-1] = next+1;
+				canmix = false;
+				newscore++;
+				ans=true;
+			} else {
+				s->arr[i][c] = next;
+				if(c != j) ans=true;
+				canmix = true;
+				c++;
 			}
 		}
-		break;
-	case LEFT:
-		for(i = 0; i < 4; i++){
-			canmix=false;
-			c = 0;
-			for(j = 0; j < 4; j++){
-				next = s->arr[j][i];
-				if(next == 0) continue;
-				if(canmix && s->arr[c-1][i] == next){
-					s->arr[c-1][i] = next+1;
-					canmix = false;
-					newscore++;
-					ans=true;
-				} else {
-					s->arr[c][i] = next;
-					if(c != j) ans=true;
-					canmix = true;
-					c++;
-				}
-			}
-			for(; c<4; c++){
-				s->arr[c][i] = 0;
+		for(; c<4; c++){
+			s->arr[i][c] = 0;
+		}
+	}
+	s->score=newscore;
+	return ans;
+}
+bool moveleft(struct state *s){
+	char c,i,j,next;
+	bool canmix = false;
+	char newscore = s->score;
+	bool ans = false;
+	for(i = 0; i < 4; i++){
+		canmix=false;
+		c = 0;
+		for(j = 0; j < 4; j++){
+			next = s->arr[j][i];
+			if(next == 0) continue;
+			if(canmix && s->arr[c-1][i] == next){
+				s->arr[c-1][i] = next+1;
+				canmix = false;
+				newscore++;
+				ans=true;
+			} else {
+				s->arr[c][i] = next;
+				if(c != j) ans=true;
+				canmix = true;
+				c++;
 			}
 		}
-		break;
-	case DOWN:
-		for(i = 0; i < 4; i++){
-			canmix=false;
-			c = 0;
-			for(j = 0; j < 4; j++){
-				next = s->arr[i][3-j];
-				if(next == 0) continue;
-				if(canmix && s->arr[i][4-c] == next){
-					s->arr[i][4-c] = next+1;
-					canmix = false;
-					newscore++;
-					ans=true;
-				} else {
-					s->arr[i][3-c] = next;
-					if(c != j) ans=true;
-					canmix = true;
-					c++;
-				}
-			}
-			for(; c<4; c++){
-				s->arr[i][3-c] = 0;
+		for(; c<4; c++){
+			s->arr[c][i] = 0;
+		}
+	}
+	s->score=newscore;
+	return ans;
+}
+bool movedown(struct state *s){
+	char c,i,j,next;
+	bool canmix = false;
+	char newscore = s->score;
+	bool ans = false;
+	for(i = 0; i < 4; i++){
+		canmix=false;
+		c = 0;
+		for(j = 0; j < 4; j++){
+			next = s->arr[i][3-j];
+			if(next == 0) continue;
+			if(canmix && s->arr[i][4-c] == next){
+				s->arr[i][4-c] = next+1;
+				canmix = false;
+				newscore++;
+				ans=true;
+			} else {
+				s->arr[i][3-c] = next;
+				if(c != j) ans=true;
+				canmix = true;
+				c++;
 			}
 		}
-		break;
-	case RIGHT:
-		for(i = 0; i < 4; i++){
-			canmix=false;
-			c = 0;
-			for(j = 0; j < 4; j++){
-				next = s->arr[3-j][i];
-				if(next == 0) continue;
-				if(canmix && s->arr[4-c][i] == next){
-					s->arr[4-c][i] = next+1;
-					canmix = false;
-					newscore++;
-					ans=true;
-				} else {
-					s->arr[3-c][i] = next;
-					if(c != j) ans=true;
-					canmix = true;
-					c++;
-				}
-			}
-			for(; c<4; c++){
-				s->arr[3-c][i] = 0;
+		for(; c<4; c++){
+			s->arr[i][3-c] = 0;
+		}
+	}
+	s->score=newscore;
+	return ans;
+}
+bool moveright(struct state *s){
+	char c,i,j,next;
+	bool canmix = false;
+	char newscore = s->score;
+	bool ans = false;
+	for(i = 0; i < 4; i++){
+		canmix=false;
+		c = 0;
+		for(j = 0; j < 4; j++){
+			next = s->arr[3-j][i];
+			if(next == 0) continue;
+			if(canmix && s->arr[4-c][i] == next){
+				s->arr[4-c][i] = next+1;
+				canmix = false;
+				newscore++;
+				ans=true;
+			} else {
+				s->arr[3-c][i] = next;
+				if(c != j) ans=true;
+				canmix = true;
+				c++;
 			}
 		}
-		break;
+		for(; c<4; c++){
+			s->arr[3-c][i] = 0;
+		}
 	}
 	s->score=newscore;
 	return ans;
@@ -148,15 +162,28 @@ double go2(struct state *s, char rec);
 
 double go(struct state *s, char rec){
 	struct state temp;
-	double ans = -100;
+	double ans = -101;
 
 	int i;
-	for(i=0; i<4; i++){
-		temp=*s;
-		if(move(&temp, i)){
-			double t = go2(&temp,rec);
-			if(t>ans) ans=t;
-		}
+	temp = *s;
+	if(moveup(&temp)){
+		double t = go2(&temp,rec);
+		if(t>ans) ans=t;
+	}
+	temp = *s;
+	if(moveleft(&temp)){
+		double t = go2(&temp,rec);
+		if(t>ans) ans=t;
+	}
+	temp = *s;
+	if(movedown(&temp)){
+		double t = go2(&temp,rec);
+		if(t>ans) ans=t;
+	}
+	temp = *s;
+	if(moveright(&temp)){
+		double t = go2(&temp,rec);
+		if(t>ans) ans=t;
 	}
 	return ans;
 }
@@ -319,17 +346,36 @@ int main(int argc, char** argv){
 //		char rec = reclist[s.score];
 		char rec = 3;
 		
-		double top = -101;
+		double top = -102;
 		struct state *best = NULL;
 
-		for(i=0; i<4; i++){
-			dir[i] = s;
-			if(move(&(dir[i]),i)){
-				double t = go2(&(dir[i]), rec);
-				if(t>top){
-					top=t;
-					best=&(dir[i]);
-				}
+		dir[0] = dir[1] = dir[2] = dir[3] = s;
+		if(moveup(&(dir[0]))){
+			double t = go2(&(dir[0]), rec);
+			if(t>top){
+				top=t;
+				best=&(dir[0]);
+			}
+		}
+		if(moveright(&(dir[1]))){
+			double t = go2(&(dir[1]), rec);
+			if(t>top){
+				top=t;
+				best=&(dir[1]);
+			}
+		}
+		if(movedown(&(dir[2]))){
+			double t = go2(&(dir[2]), rec);
+			if(t>top){
+				top=t;
+				best=&(dir[2]);
+			}
+		}
+		if(moveleft(&(dir[3]))){
+			double t = go2(&(dir[3]), rec);
+			if(t>top){
+				top=t;
+				best=&(dir[3]);
 			}
 		}
 
