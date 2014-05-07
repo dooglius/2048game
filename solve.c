@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -18,7 +19,7 @@ struct state{
 };
 
 //const char reclist[] = {8,7,6,6,5,5,4,4,4,4,4,4,3,3,3};
-const char reclist[] = {7,6,5,5,5,5,4,4,4,4,4,4,4,4,3};
+const char reclist[] = {6,5,4,4,4,4,4,3,3,3,3,3,3,3,3};
 
 int fd;
 
@@ -217,37 +218,46 @@ double go2(struct state *s, char rec){
 }
 
 
-unsigned char randbyte(void){
-	unsigned char r;
-/*
-	if(read(fd,&r,1) != 1){
+uint32_t randbytes(void){
+	uint32_t r;
+#ifdef NORAND
+	r = rand();
+#else
+	if(read(fd,&r,sizeof(uint32_t)) != 4){
 		printf("Error getting random number\n");
 		exit(1);
 	}
-*/
-	r = rand();
+#endif
 	return r;
 }
 
+uint32_t r;
+int randsize=0;
+
 void addrand(struct state *s){
 	char v,x,y;
-	unsigned char r;
-	bool parity = true;
 	do{
-		if(parity) r = randbyte();
+		if(randsize==0){
+			r = randbytes();
+			randsize = 32;
+		}
 		else r = r >> 4;
 		x = r&3;
 		y = (r&12) >> 2;
-		parity = !parity;
+		randsize -= 4;
 	} while(s->arr[x][y] != 0);
 
 	while(1){
-		if(parity) r = randbyte();
+		if(randsize==0){
+			r = randbytes();
+			randsize = 32;
+		}
 		else r = r >> 4;
-		if(r<8) v=1;
-		else if(r<10) v=2;
+		int t = r & 0xF;
+		randsize -= 4;
+		if(x<9) v=1;
+		else if(x<10) v=2;
 		else{
-			parity = !parity;
 			continue;
 		}
 		break;
@@ -343,8 +353,8 @@ int main(int argc, char** argv){
 		}
 	
 		struct state dir[4];
-//		char rec = reclist[s.score];
-		char rec = 3;
+		char rec = reclist[s.score];
+//		char rec = 3;
 		
 		double top = -102;
 		struct state *best = NULL;
