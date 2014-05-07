@@ -19,7 +19,7 @@ struct state{
 };
 
 //const char reclist[] = {8,7,6,6,5,5,4,4,4,4,4,4,3,3,3};
-const char reclist[] = {6,5,4,4,4,4,4,3,3,3,3,3,3,3,3};
+const char reclist[] = {7,6,5,4,4,4,4,3,3,3,3,3,3,3,3};
 
 int fd;
 
@@ -163,7 +163,7 @@ double go2(struct state *s, char rec);
 
 double go(struct state *s, char rec){
 	struct state temp;
-	double ans = -101;
+	double ans = -126;
 
 	int i;
 	temp = *s;
@@ -200,7 +200,7 @@ double go2(struct state *s, char rec){
 		for(j = 0; j < 4; j++){
 			if(s->arr[i][j] == 0){
 				s->arr[i][j] = 1;
-				if(rec>3){
+				if(rec>2){
 					double t = 0.9*go(s, rec-1);
 					s->arr[i][j] = 2;
 					ans += t+0.1*go(s,rec-1);
@@ -213,7 +213,7 @@ double go2(struct state *s, char rec){
 		}
 	}
 	s->score++;
-	if(c==0) return -100;
+	if(c==0) return -100 - rec;
 	return ans/c;
 }
 
@@ -356,43 +356,68 @@ int main(int argc, char** argv){
 		char rec = reclist[s.score];
 //		char rec = 3;
 		
-		double top = -102;
+		double top = -127;
 		struct state *best = NULL;
 
 		dir[0] = dir[1] = dir[2] = dir[3] = s;
-		if(moveup(&(dir[0]))){
-			double t = go2(&(dir[0]), rec);
-			if(t>top){
-				top=t;
-				best=&(dir[0]);
-			}
-		}
-		if(moveright(&(dir[1]))){
-			double t = go2(&(dir[1]), rec);
-			if(t>top){
-				top=t;
-				best=&(dir[1]);
-			}
-		}
-		if(movedown(&(dir[2]))){
-			double t = go2(&(dir[2]), rec);
-			if(t>top){
-				top=t;
-				best=&(dir[2]);
-			}
-		}
-		if(moveleft(&(dir[3]))){
-			double t = go2(&(dir[3]), rec);
-			if(t>top){
-				top=t;
-				best=&(dir[3]);
-			}
-		}
-
-		if(best==NULL){
+		bool u,d,r,l;
+		u = moveup(&(dir[0]));
+		r = moveright(&(dir[1]));
+		d = movedown(&(dir[2]));
+		l = moveleft(&(dir[3]));
+		int count = 0;
+		if(u) count++;
+		if(r) count++;
+		if(d) count++;
+		if(l) count++;
+		if(count == 0){
 			printf("No good moves, ending in this state:\n\n\n");
 			print(&s);
 			return 0;
+		}
+		if(u){
+			if(count>1){
+				double t = go2(&(dir[0]), rec);
+				if(t>top){
+					top=t;
+					best=&(dir[0]);
+				}
+			} else {
+				best=&(dir[0]);
+			}
+		}
+		if(r){
+			if(count>1){
+				double t = go2(&(dir[1]), rec);
+				if(t>top){
+					top=t;
+					best=&(dir[1]);
+				}
+			} else {
+				best=&(dir[1]);
+			}
+		}
+		if(d){
+			if(count>1){
+				double t = go2(&(dir[2]), rec);
+				if(t>top){
+					top=t;
+					best=&(dir[2]);
+				}
+			} else {
+				best=&(dir[2]);
+			}
+		}
+		if(l){
+			if(count>1){
+				double t = go2(&(dir[3]), rec);
+				if(t>top){
+					top=t;
+					best=&(dir[3]);
+				}
+			} else {
+				best=&(dir[3]);
+			}
 		}
 
 		if(best == &(dir[0])){
